@@ -22,6 +22,7 @@ class RegisterView(APIView):
             return Response({
                 "success": True,
                 "message": "User registered successfully",
+                "code": "201",
                 "data": response_serializer.data
             }, status=status.HTTP_201_CREATED)
 
