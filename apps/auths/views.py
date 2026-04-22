@@ -36,7 +36,7 @@ class RegisterView(APIView):
 
         # cek apakah ada error "required"
         is_required_error = any(
-            "This field is required." in str(err)
+            "field is required." in str(err)
             for field_errors in errors.values()
             for err in field_errors
         )
