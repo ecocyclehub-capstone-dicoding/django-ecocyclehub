@@ -27,11 +27,6 @@ class RegisterView(APIView):
                 "data": response_serializer.data
             }, status=status.HTTP_201_CREATED)
 
-        # return Response({
-        #     "success": False,
-        #     "message": "Validation error",
-        #     "errors": serializer.errors
-        # }, status=status.HTTP_400_BAD_REQUEST)
         errors = serializer.errors
 
         # cek apakah ada error "required"
