@@ -14,7 +14,7 @@ class UserManager(BaseUserManager):
             try:
                 extra_fields["role"] = Role.objects.get(key="customer")
             except Role.DoesNotExist:
-                pass  # fallback kalau belum ada
+                pass  # fallback if role doesn't exist yet
         
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
@@ -35,7 +35,7 @@ class UserManager(BaseUserManager):
 class User(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
-    username = None  # kita pakai email
+    username = None  # using email as the username field
     email = models.EmailField(unique=True)
     name = models.CharField(max_length=255)
     role = models.ForeignKey('permissions.Role', on_delete=models.SET_NULL, null=True, blank=True)
