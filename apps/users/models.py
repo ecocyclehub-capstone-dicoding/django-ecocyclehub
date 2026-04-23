@@ -1,8 +1,11 @@
 import uuid
+import logging
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import BaseUserManager
 from django.db import models
 from apps.permissions.models import Role
+
+logger = logging.getLogger(__name__)
 
 class UserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
@@ -14,7 +17,7 @@ class UserManager(BaseUserManager):
             try:
                 extra_fields["role"] = Role.objects.get(key="customer")
             except Role.DoesNotExist:
-                pass  # fallback if role doesn't exist yet
+                logger.warning("Default 'customer' role not found. User will be created without a role. Run data migrations to create default roles.")
         
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
