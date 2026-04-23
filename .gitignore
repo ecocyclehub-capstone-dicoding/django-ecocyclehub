@@ -30,6 +30,7 @@ staticfiles/
 # ========================
 .env
 .env.*
+!.env.example
 
 # ========================
 # VS Code / IDE
@@ -57,11 +58,6 @@ htmlcov/
 # ========================
 # apps/*/migrations/*.py
 # !apps/*/migrations/__init__.py
-
-# ========================
-# Logs
-# ========================
-*.log
 
 # ========================
 # Build / dist
