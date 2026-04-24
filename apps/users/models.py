@@ -34,6 +34,9 @@ class UserManager(BaseUserManager):
 
         if extra_fields.get("is_superuser") is not True:
             raise ValueError("Superuser must have is_superuser=True")
+        
+        if extra_fields.get("role") is None:
+            raise ValueError("Superuser role must be provided explicitly")
 
         return self.create_user(email, password, **extra_fields)
 
