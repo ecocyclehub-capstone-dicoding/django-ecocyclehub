@@ -13,11 +13,13 @@ class UserManager(BaseUserManager):
             raise ValueError("Email is required")
 
         email = self.normalize_email(email)
-        if "role" not in extra_fields:
+        if extra_fields.get("role") is None:
             try:
                 extra_fields["role"] = Role.objects.get(key="customer")
-            except Role.DoesNotExist:
-                logger.warning("Default 'customer' role not found. User will be created without a role. Run data migrations to create default roles.")
+            except Role.DoesNotExist as exc:
+                raise ValueError(
+                    "Default 'customer' role not found. Run data migrations to create default roles before registering users."
+                ) from exc
         
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
