@@ -1,3 +1,4 @@
+from django.db import IntegrityError, transaction
 from rest_framework import serializers
 from apps.users.models import User
 from apps.permissions.models import Role
@@ -38,12 +39,21 @@ class RegisterSerializer(serializers.ModelSerializer):
         return value
 
     def create(self, validated_data):
-        role = Role.objects.get(key="customer")
+        role = Role.objects.filter(key="customer").first()
+        if role is None:
+            raise serializers.ValidationError(
+                {"role": "Default customer role is not configured."}
+            )
 
-        user = User.objects.create_user(
-            email=validated_data["email"],
-            password=validated_data["password"],
-            name=validated_data["name"],
-            role=role
-        )
-        return user
+        try:
+            with transaction.atomic():
+                return User.objects.create_user(
+                    email=validated_data["email"],
+                    password=validated_data["password"],
+                    name=validated_data["name"],
+                    role=role,
+                )
+        except IntegrityError as exc:
+            raise serializers.ValidationError(
+                {"email": "Email already registered"}
+            ) from exc
