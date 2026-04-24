@@ -1,4 +1,6 @@
 from django.db import IntegrityError, transaction
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework import serializers
 from apps.users.models import User
 from apps.permissions.models import Role
@@ -34,8 +36,10 @@ class RegisterSerializer(serializers.ModelSerializer):
         return value
     
     def validate_password(self, value):
-        if len(value) < 8:
-            raise serializers.ValidationError("Minimum 8 characters")
+        try:
+            validate_password(value)
+        except DjangoValidationError as exc:
+            raise serializers.ValidationError(list(exc.messages)) from exc
         return value
 
     def create(self, validated_data):
