@@ -12,14 +12,14 @@ class RegisterSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(
         error_messages={
             "required": "The email field is required.",
-            "blank": "The name field cannot be empty."
+            "blank": "The email field cannot be empty."
         }
     )
     password = serializers.CharField(
         write_only=True,
         error_messages={
             "required": "The password field is required.",
-            "blank": "The name field cannot be empty."
+            "blank": "The password field cannot be empty."
         }
     )
 
