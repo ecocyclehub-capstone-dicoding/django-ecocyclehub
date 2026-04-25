@@ -4,6 +4,7 @@ from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework import serializers
 from apps.users.models import User
 from apps.permissions.models import Role
+from django.contrib.auth import authenticate
 
 class RegisterSerializer(serializers.ModelSerializer):
     name = serializers.CharField(
@@ -61,3 +62,20 @@ class RegisterSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 {"email": "Email already registered"}
             ) from exc
+
+class LoginSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True)
+
+    def validate(self, data):
+        user = authenticate(
+            request=self.context.get("request"),
+            email=data.get("email"),
+            password=data.get("password")
+        )
+
+        if not user:
+            raise serializers.ValidationError("Invalid email or password")
+
+        data["user"] = user
+        return data
