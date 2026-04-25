@@ -2,10 +2,11 @@ from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from apps.users.models import User
 from common.responses import format_error_response
-from .serializers import RegisterSerializer
+from .serializers import RegisterSerializer, LoginSerializer
 from apps.users.serializers import UserResponseSerializer
 
 class RegisterView(APIView):
@@ -54,3 +55,48 @@ class RegisterView(APIView):
             ),
             status=400
         )
+
+class LoginView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = LoginSerializer(
+            data=request.data,
+            context={"request": request}
+        )
+
+        if serializer.is_valid():
+            user = serializer.validated_data["user"]
+
+            refresh = RefreshToken.for_user(user)
+
+            user = User.objects.select_related("role").prefetch_related("role__permissions").get(id=user.id)
+
+            return Response({
+                "success": True,
+                "message": "User login successfully",
+                "code": "200",
+                "data": {
+                    "access_token": str(refresh.access_token),
+                    "refresh_token": str(refresh),
+                    "role": {
+                        "id": user.role.id,
+                        "name": user.role.name,
+                        "key": user.role.key,
+                        "permissions": [
+                            {
+                                "name": p.name,
+                                "key": p.key,
+                                "group": p.group
+                            }
+                            for p in user.role.permissions.all()
+                        ]
+                    } if user.role else None
+                }
+            })
+
+        return Response({
+            "success": False,
+            "message": "Invalid credentials",
+            "errors": serializer.errors
+        }, status=status.HTTP_401_UNAUTHORIZED)
