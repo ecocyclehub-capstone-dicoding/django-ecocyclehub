@@ -87,5 +87,6 @@ class LoginView(APIView):
         return Response({
             "success": False,
             "message": "Invalid credentials",
+            "code": "401",
             "errors": serializer.errors
         }, status=status.HTTP_401_UNAUTHORIZED)
