@@ -31,12 +31,13 @@ class RegisterView(APIView):
 
         errors = serializer.errors
 
-        # cek apakah ada error "required"
+        # Check for "required" error codes
         is_required_error = any(
-            "field is required." in str(err)
+            getattr(err, 'code', None) == 'required'
             for field_errors in errors.values()
             for err in field_errors
         )
+
 
         if is_required_error:
             return Response(
