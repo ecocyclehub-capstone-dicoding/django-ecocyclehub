@@ -38,10 +38,10 @@ class UserManager(BaseUserManager):
         if "role" not in extra_fields or extra_fields["role"] is None:
             try:
                 extra_fields["role"] = Role.objects.get(key="superadmin")
-            except ObjectDoesNotExist:
+            except Role.DoesNotExist:
                 try:
                     extra_fields["role"] = Role.objects.get(key="admin")
-                except ObjectDoesNotExist:
+                except Role.DoesNotExist:
                     extra_fields["role"] = None
 
         return self.create_user(email, password, **extra_fields)
