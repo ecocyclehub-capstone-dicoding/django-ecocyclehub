@@ -1,29 +1,28 @@
 from django.db import migrations
 
+ROLES = [
+    ("customer", "Customer"),
+    ("officer", "Officer"),
+    ("admin", "Admin"),
+    ("superadmin", "Super Admin"),
+]
+
 
 def create_roles(apps, schema_editor):
     Role = apps.get_model('permissions', 'Role')
 
-    Role.objects.get_or_create(
-        key='customer',
-        defaults={'name': 'Customer'}
-    )
-
-    Role.objects.get_or_create(
-        key='admin',
-        defaults={'name': 'Admin'}
-    )
-
-    Role.objects.get_or_create(
-        key='superadmin',
-        defaults={'name': 'Super Admin'}
-    )
+    for key, name in ROLES:
+        Role.objects.get_or_create(
+            key=key,
+            defaults={"name": name}
+        )
 
 
 def reverse_roles(apps, schema_editor):
     Role = apps.get_model('permissions', 'Role')
 
-    Role.objects.filter(key__in=['customer', 'admin', 'superadmin']).delete()
+    keys = [r[0] for r in ROLES]
+    Role.objects.filter(key__in=keys).delete()
 
 
 class Migration(migrations.Migration):
