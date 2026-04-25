@@ -2,6 +2,7 @@ from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
+from apps.permissions.serializers import RoleSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from apps.users.models import User
@@ -79,19 +80,7 @@ class LoginView(APIView):
                 "data": {
                     "access_token": str(refresh.access_token),
                     "refresh_token": str(refresh),
-                    "role": {
-                        "id": user.role.id,
-                        "name": user.role.name,
-                        "key": user.role.key,
-                        "permissions": [
-                            {
-                                "name": p.name,
-                                "key": p.key,
-                                "group": p.group
-                            }
-                            for p in user.role.permissions.all()
-                        ]
-                    } if user.role else None
+                    "role": RoleSerializer(user.role).data if user.role else None
                 }
             })
 
