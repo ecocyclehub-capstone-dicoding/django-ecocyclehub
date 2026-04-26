@@ -2,13 +2,12 @@ from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
-from apps.permissions.serializers import RoleSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
-
+from apps.permissions.serializers import RoleSerializer
+from apps.users.serializers import UserResponseSerializer
 from apps.users.models import User
 from common.responses import format_error_response
 from .serializers import RegisterSerializer, LoginSerializer
-from apps.users.serializers import UserResponseSerializer
 
 class RegisterView(APIView):
     permission_classes = [AllowAny]
@@ -18,7 +17,12 @@ class RegisterView(APIView):
 
         if serializer.is_valid():
             user = serializer.save()
-            user = User.objects.select_related("role").prefetch_related("role__permissions").get(id=user.id)
+            user = (
+                User.objects
+                .select_related("role")
+                .prefetch_related("role__permissions")
+                .get(id=user.id)
+            )
 
             response_serializer = UserResponseSerializer(user)
 
@@ -72,7 +76,12 @@ class LoginView(APIView):
 
             refresh = RefreshToken.for_user(user)
 
-            user = User.objects.select_related("role").prefetch_related("role__permissions").get(id=user.id)
+            user = (
+                User.objects
+                .select_related("role")
+                .prefetch_related("role__permissions")
+                .get(id=user.id)
+            )
 
             return Response({
                 "success": True,
