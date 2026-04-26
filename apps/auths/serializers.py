@@ -63,19 +63,20 @@ class RegisterSerializer(serializers.ModelSerializer):
                 {"email": "Email already registered"}
             ) from exc
 
+# pylint: disable=abstract-method
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
 
-    def validate(self, data):
+    def validate(self, attrs):
         user = authenticate(
             request=self.context.get("request"),
-            email=data.get("email"),
-            password=data.get("password")
+            email=attrs.get("email"),
+            password=attrs.get("password")
         )
 
         if not user:
             raise serializers.ValidationError("Invalid email or password")
 
-        data["user"] = user
-        return data
+        attrs["user"] = user
+        return attrs
