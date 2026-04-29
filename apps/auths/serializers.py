@@ -1,4 +1,5 @@
 from django.db import IntegrityError, transaction
+from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework import serializers
@@ -29,12 +30,12 @@ class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ["name", "email", "password"]
-    
+
     def validate_email(self, value):
         if User.objects.filter(email=value).exists():
             raise serializers.ValidationError("Email already registered")
         return value
-    
+
     def validate_password(self, value):
         try:
             validate_password(value)
@@ -61,3 +62,21 @@ class RegisterSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 {"email": "Email already registered"}
             ) from exc
+
+# pylint: disable=abstract-method
+class LoginSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True)
+
+    def validate(self, attrs):
+        user = authenticate(
+            request=self.context.get("request"),
+            email=attrs.get("email"),
+            password=attrs.get("password")
+        )
+
+        if not user:
+            raise serializers.ValidationError("Invalid email or password")
+
+        attrs["user"] = user
+        return attrs
