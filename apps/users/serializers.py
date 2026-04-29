@@ -1,6 +1,6 @@
 from rest_framework import serializers
-from .models import User
 from apps.permissions.serializers import RoleSerializer
+from .models import User
 
 class UserResponseSerializer(serializers.ModelSerializer):
     role = RoleSerializer()
