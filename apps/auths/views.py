@@ -3,6 +3,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.views import TokenRefreshView
 from apps.permissions.serializers import RoleSerializer
 from apps.users.serializers import UserResponseSerializer
 from apps.users.models import User
@@ -99,4 +100,25 @@ class LoginView(APIView):
             "message": "Invalid credentials",
             "code": "401",
             "errors": serializer.errors
+        }, status=status.HTTP_401_UNAUTHORIZED)
+
+class CustomTokenRefreshView(TokenRefreshView):
+    def post(self, request, *args, **kwargs):
+        response = super().post(request, *args, **kwargs)
+
+        if response.status_code == 200:
+            return Response({
+                "success": True,
+                "message": "Token refreshed successfully",
+                "code": "200",
+                "data": {
+                    "access_token": response.data.get("access")
+                }
+            })
+
+        return Response({
+            "success": False,
+            "message": "Invalid refresh token",
+            "code": "401",
+            "errors": response.data
         }, status=status.HTTP_401_UNAUTHORIZED)
