@@ -118,7 +118,7 @@ class CustomTokenRefreshView(TokenRefreshView):
 
         return Response({
             "success": False,
-            "message": "Invalid refresh token",
-            "code": "401",
+            "message": "Token refresh failed",
+            "code": str(response.status_code),
             "errors": response.data
-        }, status=status.HTTP_401_UNAUTHORIZED)
+        }, status=response.status_code)
