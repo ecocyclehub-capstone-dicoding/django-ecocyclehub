@@ -11,6 +11,7 @@ class CategorySerializer(serializers.ModelSerializer):
     )
 
     price_per_kg = serializers.IntegerField(
+        min_value=0,
         error_messages={
             "required": "The price field is required.",
             "invalid": "Price should a number"
@@ -18,6 +19,7 @@ class CategorySerializer(serializers.ModelSerializer):
     )
 
     point_per_kg = serializers.IntegerField(
+        min_value=0,
         error_messages={
             "required": "The point field is required.",
             "invalid": "Point should a number"
