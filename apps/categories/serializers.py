@@ -29,6 +29,12 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = "__all__"
 
     def validate_name(self, value):
-        if Category.objects.filter(name__iexact=value).exists():
+        queryset = Category.objects.filter(name__iexact=value)
+
+        if self.instance:
+            queryset = queryset.exclude(pk=self.instance.pk)
+
+        if queryset.exists():
             raise serializers.ValidationError("Category already registered")
+
         return value
