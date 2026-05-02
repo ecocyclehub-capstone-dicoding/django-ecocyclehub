@@ -12,8 +12,17 @@ from apps.permissions.custom_permissions import (
 from .serializers import CategorySerializer
 from .models import Category
 
-class CategoryCreateView(APIView):
-    permission_classes = [CanAddCategory]
+class CategoryListCreateView(APIView):
+    def get_permissions(self):
+        permission_map = {
+            'GET': CanViewCategory,
+            'POST': CanAddCategory,
+            'PUT': CanEditCategory,
+            'DELETE': CanDeleteCategory,
+        }
+
+        permission_class = permission_map.get(self.request.method)
+        return [permission_class()] if permission_class else []
 
     def post(self, request):
         serializer = CategorySerializer(data=request.data)
@@ -35,10 +44,7 @@ class CategoryCreateView(APIView):
             error["response"],
             status=error["status"]
         )
-
-class CategoryListView(APIView):
-    permission_classes = [CanViewCategory]
-
+    
     def get(self, request):
         categories = Category.objects.all()
         serializer = CategorySerializer(categories, many=True)
@@ -52,8 +58,17 @@ class CategoryListView(APIView):
             status=status.HTTP_200_OK
         )
 
-class CategoryUpdateView(APIView):
-    permission_classes = [CanEditCategory]
+class CategoryUpdateDeleteView(APIView):
+    def get_permissions(self):
+        permission_map = {
+            'GET': CanViewCategory,
+            'POST': CanAddCategory,
+            'PUT': CanEditCategory,
+            'DELETE': CanDeleteCategory,
+        }
+
+        permission_class = permission_map.get(self.request.method)
+        return [permission_class()] if permission_class else []
 
     def put(self, request, pk):
         try:
@@ -61,7 +76,7 @@ class CategoryUpdateView(APIView):
         except Category.DoesNotExist:
             return Response(
                 format_error_response(
-                    "Resources not found",
+                    "Resource not found",
                     None,
                     404
                 ), status=status.HTTP_404_NOT_FOUND)
@@ -86,16 +101,13 @@ class CategoryUpdateView(APIView):
             status=error["status"]
         )
 
-class CategoryDeleteView(APIView):
-    permission_classes = [CanDeleteCategory]
-
     def delete(self, request, pk):
         try:
             category = Category.objects.get(pk=pk)
         except Category.DoesNotExist:
             return Response(
                 format_error_response(
-                    "Resources not found",
+                    "Resource not found",
                     None,
                     404
                 ), status=status.HTTP_404_NOT_FOUND)
