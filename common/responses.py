@@ -5,3 +5,11 @@ def format_error_response(message, errors, code):
         "code": str(code),
         "errors": errors
     }
+
+def format_success_response(message, data, code):
+    return {
+        "success": True,
+        "message": message,
+        "code": str(code),
+        "data": data
+    }
