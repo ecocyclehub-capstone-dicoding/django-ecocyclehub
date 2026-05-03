@@ -1,3 +1,4 @@
+from django.db import transaction as db_transaction
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -62,36 +63,34 @@ class TransactionVerifyView(APIView):
 
     def post(self, request, pk):
         try:
-            transaction = Transaction.objects.get(pk=pk)
+            with db_transaction.atomic():
+                transaction = (
+                    Transaction.objects.select_for_update()
+                    .select_related("user")
+                    .get(pk=pk)
+                )
+
+                if transaction.status == "verified":
+                    return Response(
+                        format_error_response("Transaction already verified", None, 400),
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+
+                transaction.status = "verified"
+                transaction.handled_by = request.user
+                transaction.verified_by = request.user
+                transaction.save(update_fields=["status", "handled_by", "verified_by"])
+
+                update_user_balance_and_points(
+                    user=transaction.user,
+                    total_price=transaction.total_price,
+                    total_points=transaction.total_points,
+                )
         except Transaction.DoesNotExist:
             return Response(
                 format_error_response("Resource not found", None, 404),
-                status=status.HTTP_404_NOT_FOUND
+                status=status.HTTP_404_NOT_FOUND,
             )
-
-        # prevent double verify
-        if transaction.status == "verified":
-            return Response(
-                format_error_response(
-                    "Transaction already verified",
-                    None,
-                    400
-                ),
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        # update status
-        transaction.status = "verified"
-        transaction.handled_by = request.user
-        transaction.verified_by = request.user
-        transaction.save()
-
-        # update user balance & points
-        update_user_balance_and_points(
-            user=transaction.user,
-            total_price=transaction.total_price,
-            total_points=transaction.total_points
-        )
 
         return Response(
             format_success_response(
