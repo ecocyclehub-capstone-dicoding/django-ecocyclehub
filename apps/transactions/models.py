@@ -63,11 +63,11 @@ class TransactionDetail(models.Model):
 
     weight = models.FloatField()
 
-    price_per_kg = models.PositiveIntegerField()
-    point_per_kg = models.PositiveIntegerField()
+    price_per_kg = models.IntegerField()
+    point_per_kg = models.IntegerField()
 
-    total_price = models.PositiveIntegerField()
-    total_point = models.PositiveIntegerField()
+    total_price = models.IntegerField()
+    total_point = models.IntegerField()
 
     created_at = models.DateTimeField(auto_now_add=True)
 
