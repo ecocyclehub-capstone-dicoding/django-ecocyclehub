@@ -36,3 +36,15 @@ class CanViewTransaction(HasPermission):
 class CanVerifyTransaction(HasPermission):
     def __init__(self):
         super().__init__("verify_transaction")
+
+class CanViewCustomerDashboard(HasPermission):
+    def __init__(self):
+        super().__init__("view_customer_dashboard")
+
+class CanViewOfficerDashboard(HasPermission):
+    def __init__(self):
+        super().__init__("view_officer_dashboard")
+
+class CanViewAdminDashboard(HasPermission):
+    def __init__(self):
+        super().__init__("view_admin_dashboard")
