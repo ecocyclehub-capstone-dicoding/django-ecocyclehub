@@ -106,17 +106,14 @@ class AdminDashboardView(APIView):
 
         total_transactions = transactions.count()
 
-        total_weight = transactions.aggregate(
-            total=Sum("total_weight")
-        )["total"] or 0
-
-        total_points = transactions.aggregate(
-            total=Sum("total_points")
-        )["total"] or 0
-
-        total_balance = transactions.aggregate(
-            total=Sum("total_price")
-        )["total"] or 0
+        totals = transactions.aggregate(
+            total_weight=Sum("total_weight"),
+            total_points=Sum("total_points"),
+            total_price=Sum("total_price"),
+        )
+        total_weight = totals["total_weight"] or 0
+        total_points = totals["total_points"] or 0
+        total_balance = totals["total_price"] or 0
 
         return Response(
             format_success_response(
