@@ -1,3 +1,6 @@
 from django.db import models
 
-# Create your models here.
+class Balance(models.Model):
+    user = models.OneToOneField('users.User', on_delete=models.CASCADE)
+    total_balance = models.PositiveIntegerField(default=0)
+    update_at = models.DateTimeField(auto_now_add=True)
