@@ -75,7 +75,7 @@ class OfficerDashboardView(APIView):
         today = now().date()
         verified_today = Transaction.objects.filter(
             status="verified",
-            created_at__date=today
+            verified_at__date=today
         ).count()
 
         # handled by this officer
