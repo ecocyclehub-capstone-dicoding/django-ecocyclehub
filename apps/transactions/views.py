@@ -1,4 +1,5 @@
 from django.db import transaction as db_transaction
+from django.utils.timezone import now
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -79,6 +80,7 @@ class TransactionVerifyView(APIView):
                 transaction.status = "verified"
                 transaction.handled_by = request.user
                 transaction.verified_by = request.user
+                transaction.verified_at = now()
                 transaction.save(update_fields=["status", "handled_by", "verified_by"])
 
                 update_user_balance_and_points(
