@@ -43,6 +43,7 @@ class Transaction(models.Model):
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
+    verified_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f"Transaction {self.id}"
