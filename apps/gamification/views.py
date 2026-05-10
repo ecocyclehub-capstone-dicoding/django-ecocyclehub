@@ -2,6 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from apps.points.models import Point
+from common.exceptions import handle_serializer_error
 from common.responses import (
     format_success_response,
     format_error_response
@@ -22,7 +23,8 @@ class LevelListCreateView(APIView):
                 "Levels retrieved successfully",
                 serializer.data,
                 200
-            )
+            ),
+            status=status.HTTP_200_OK
         )
 
     def post(self, request):
@@ -40,13 +42,11 @@ class LevelListCreateView(APIView):
                 status=status.HTTP_201_CREATED
             )
 
+        error = handle_serializer_error(serializer.errors)
+
         return Response(
-            format_error_response(
-                "Validation error",
-                serializer.errors,
-                400
-            ),
-            status=status.HTTP_400_BAD_REQUEST
+            error["response"],
+            status=error["status"]
         )
 
 class LevelDetailView(APIView):
@@ -74,16 +74,15 @@ class LevelDetailView(APIView):
                     "Level updated successfully",
                     serializer.data,
                     200
-                )
+                ),
+                status=status.HTTP_200_OK
             )
 
+        error = handle_serializer_error(serializer.errors)
+
         return Response(
-            format_error_response(
-                "Validation error",
-                serializer.errors,
-                400
-            ),
-            status=status.HTTP_400_BAD_REQUEST
+            error["response"],
+            status=error["status"]
         )
 
     def delete(self, request, pk):
@@ -106,25 +105,39 @@ class LevelDetailView(APIView):
                 "Level deleted successfully",
                 None,
                 200
-            )
+            ),
+            status=status.HTTP_200_OK
         )
 
 class LeaderboardView(APIView):
 
     def get(self, request):
+        limit = request.query_params.get("limit", 10)
+
         leaderboard = Point.objects.select_related(
             "user"
-        ).order_by("-total_points")[:10]
+        ).order_by(
+            "-total_points",
+            "user__created_at"
+        )[:int(limit)]
 
         data = []
 
-        for item in leaderboard:
+        for index, item in enumerate(leaderboard, start=1):
             level = get_user_level(item.total_points)
 
             data.append({
-                "name": item.user.name,
+                "rank": index,
+                "user": {
+                    "id": item.user.id,
+                    "name": item.user.name,
+                    "email": item.user.email
+                },
                 "points": item.total_points,
-                "level": level.name if level else None
+                "level": (
+                    LevelSerializer(level).data
+                    if level else None
+                )
             })
 
         return Response(
@@ -132,5 +145,6 @@ class LeaderboardView(APIView):
                 "Leaderboard retrieved successfully",
                 data,
                 200
-            )
+            ),
+            status=status.HTTP_200_OK
         )
