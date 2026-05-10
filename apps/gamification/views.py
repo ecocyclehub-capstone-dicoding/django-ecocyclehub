@@ -7,11 +7,27 @@ from common.responses import (
     format_success_response,
     format_error_response
 )
+from apps.permissions.custom_permissions import (
+    CanAddLevel,
+    CanViewLevel,
+    CanEditLevel,
+    CanDeleteLevel
+)
 from .models import Level
 from .serializers import LevelSerializer
 from .services import get_user_level
 
 class LevelListCreateView(APIView):
+    def get_permissions(self):
+        permission_map = {
+            'GET': CanViewLevel,
+            'POST': CanAddLevel,
+            'PUT': CanEditLevel,
+            'DELETE': CanDeleteLevel,
+        }
+
+        permission_class = permission_map.get(self.request.method)
+        return [permission_class()] if permission_class else []
 
     def get(self, request):
         levels = Level.objects.all()
@@ -50,6 +66,16 @@ class LevelListCreateView(APIView):
         )
 
 class LevelDetailView(APIView):
+    def get_permissions(self):
+        permission_map = {
+            'GET': CanViewLevel,
+            'POST': CanAddLevel,
+            'PUT': CanEditLevel,
+            'DELETE': CanDeleteLevel,
+        }
+
+        permission_class = permission_map.get(self.request.method)
+        return [permission_class()] if permission_class else []
 
     def put(self, request, pk):
         try:
