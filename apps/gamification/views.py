@@ -11,7 +11,8 @@ from apps.permissions.custom_permissions import (
     CanAddLevel,
     CanViewLevel,
     CanEditLevel,
-    CanDeleteLevel
+    CanDeleteLevel,
+    CanViewLeaderboard
 )
 from .models import Level
 from .serializers import LevelSerializer
@@ -136,6 +137,7 @@ class LevelDetailView(APIView):
         )
 
 class LeaderboardView(APIView):
+    permission_classes = [CanViewLeaderboard]
 
     def get(self, request):
         limit = request.query_params.get("limit", 10)

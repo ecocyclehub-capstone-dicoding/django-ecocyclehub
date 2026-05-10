@@ -64,3 +64,7 @@ class CanEditLevel(HasPermission):
 class CanDeleteLevel(HasPermission):
     def __init__(self):
         super().__init__("delete_level")
+
+class CanViewLeaderboard(HasPermission):
+    def __init__(self):
+        super().__init__("delete_level")
