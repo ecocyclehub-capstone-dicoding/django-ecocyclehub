@@ -140,14 +140,37 @@ class LeaderboardView(APIView):
     permission_classes = [CanViewLeaderboard]
 
     def get(self, request):
-        limit = request.query_params.get("limit", 10)
+        try:
+            limit = int(request.query_params.get("limit", 10))
+        except (ValueError, TypeError):
+            return Response(
+                format_error_response(
+                    "Invalid limit parameter",
+                    None,
+                    400
+                ),
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if limit < 1:
+            return Response(
+                format_error_response(
+                    "Limit must be at least 1",
+                    None,
+                    400
+                ),
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Cap at reasonable maximum to prevent performance issues
+        limit = min(limit, 100)
 
         leaderboard = Point.objects.select_related(
             "user"
         ).order_by(
             "-total_points",
             "user__created_at"
-        )[:int(limit)]
+        )[:limit]
 
         data = []
 
