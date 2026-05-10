@@ -71,7 +71,7 @@ def assign_permissions(apps, schema_editor):
 def reverse_assign_permissions(apps, schema_editor):
     Role = apps.get_model("permissions", "Role")
 
-    for role in Role.objects.all():
+    for role in Role.objects.filter(key__in=["customer", "officer", "admin", "superadmin"]):
         role.permissions.clear()
 
 class Migration(migrations.Migration):
