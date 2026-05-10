@@ -67,4 +67,4 @@ class CanDeleteLevel(HasPermission):
 
 class CanViewLeaderboard(HasPermission):
     def __init__(self):
-        super().__init__("delete_level")
+        super().__init__("view_leaderboard")
