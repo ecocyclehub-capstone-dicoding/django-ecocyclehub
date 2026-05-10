@@ -16,7 +16,7 @@ class LevelSerializer(serializers.ModelSerializer):
     min_points = serializers.IntegerField(
         error_messages={
             "required": "The minimum points field is required.",
-            "invalid": "Minimum points should a number."
+            "invalid": "Minimum points should be a number."
         }
     )
 
