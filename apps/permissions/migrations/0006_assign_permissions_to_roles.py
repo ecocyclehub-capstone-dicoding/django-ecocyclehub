@@ -52,24 +52,20 @@ def assign_permissions(apps, schema_editor):
     # SUPERADMIN
     superadmin_permissions = Permission.objects.all()
 
-    customer.permissions.set(
-        Permission.objects.filter(
-            key__in=customer_permissions
-        )
-    )
+    def _resolve_permissions(keys, role_key):
+        qs = Permission.objects.filter(key__in=keys)
+        found = set(qs.values_list("key", flat=True))
+        expected = set(keys)
+        missing = expected - found
+        if missing:
+            raise RuntimeError(
+                f"Missing permissions for role '{role_key}': {sorted(missing)}"
+            )
+        return qs
 
-    officer.permissions.set(
-        Permission.objects.filter(
-            key__in=officer_permissions
-        )
-    )
-
-    admin.permissions.set(
-        Permission.objects.filter(
-            key__in=admin_permissions
-        )
-    )
-
+    customer.permissions.set(_resolve_permissions(customer_permissions, "customer"))
+    officer.permissions.set(_resolve_permissions(officer_permissions, "officer"))
+    admin.permissions.set(_resolve_permissions(admin_permissions, "admin"))
     superadmin.permissions.set(superadmin_permissions)
 
 def reverse_assign_permissions(apps, schema_editor):
