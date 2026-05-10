@@ -30,7 +30,7 @@ def reverse_seed_levels(apps, schema_editor):
     Level = apps.get_model("gamification", "Level")
 
     Level.objects.filter(
-        min_points__in=[0, 1000, 3000, 7000]
+        min_points__in=[0, 100, 300, 700, 1500, 3000, 5000, 8000, 12000, 20000]
     ).delete()
 
 class Migration(migrations.Migration):
