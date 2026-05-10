@@ -48,3 +48,19 @@ class CanViewOfficerDashboard(HasPermission):
 class CanViewAdminDashboard(HasPermission):
     def __init__(self):
         super().__init__("view_admin_dashboard")
+
+class CanAddLevel(HasPermission):
+    def __init__(self):
+        super().__init__("add_level")
+
+class CanViewLevel(HasPermission):
+    def __init__(self):
+        super().__init__("view_level")
+
+class CanEditLevel(HasPermission):
+    def __init__(self):
+        super().__init__("edit_level")
+
+class CanDeleteLevel(HasPermission):
+    def __init__(self):
+        super().__init__("delete_level")
