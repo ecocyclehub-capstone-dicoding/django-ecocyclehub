@@ -23,4 +23,5 @@ urlpatterns = [
     path('api/categories/', include('apps.categories.urls')),
     path('api/transactions/', include('apps.transactions.urls')),
     path('api/dashboard/', include('apps.dashboards.urls')),
+    path('api/gamification/', include('apps.gamification.urls')),
 ]
