@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'apps.balances',
     'apps.permissions',
     'apps.dashboards',
+    'apps.gamification',
 ]
 
 MIDDLEWARE = [
