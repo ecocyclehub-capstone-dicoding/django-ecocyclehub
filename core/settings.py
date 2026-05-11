@@ -177,6 +177,19 @@ SPECTACULAR_SETTINGS = {
     'DESCRIPTION': 'API documentation for EcoCycle Hub',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
+    'COMPONENT_SPLIT_REQUEST': True,
+    'SECURITY': [
+        {
+            'BearerAuth': [],
+        }
+    ],
+    'AUTHENTICATION_WHITELIST': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+    'SWAGGER_UI_SETTINGS': {
+        'deepLinking': True,
+        'persistAuthorization': True,
+    },
 }
 
 SIMPLE_JWT = {
