@@ -3,6 +3,8 @@ from django.utils.timezone import now
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from apps.gamification.serializers import LevelSerializer
+from apps.gamification.services import get_user_level
 from apps.transactions.models import Transaction
 from apps.points.models import Point
 from apps.balances.models import Balance
@@ -24,6 +26,9 @@ class CustomerDashboardView(APIView):
         # total points
         point_obj = Point.objects.filter(user=user).first()
         total_points = point_obj.total_points if point_obj else 0
+
+        # level
+        level = get_user_level(total_points)
 
         # total balance
         balance_obj = Balance.objects.filter(user=user).first()
@@ -53,6 +58,10 @@ class CustomerDashboardView(APIView):
                 "Customer dashboard retrieved",
                 {
                     "total_points": total_points,
+                    "level": (
+                        LevelSerializer(level).data
+                        if level else None
+                    ),
                     "total_balance": total_balance,
                     "total_transactions": total_transactions,
                     "recent_transactions": recent_data
