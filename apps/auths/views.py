@@ -1,5 +1,5 @@
 from rest_framework.views import APIView
-from rest_framework import status
+from rest_framework import status, serializers
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -130,7 +130,17 @@ class LogoutView(APIView):
         serializer = LogoutSerializer(data=request.data, context={"request": request})
 
         if serializer.is_valid():
-            serializer.save()
+            try:
+                serializer.save()
+            except serializers.ValidationError as exc:
+                return Response(
+                    format_error_response(
+                        "Validation error",
+                        exc.detail,
+                        400
+                    ),
+                    status=status.HTTP_400_BAD_REQUEST
+                )
 
             return Response(
                 format_success_response(
