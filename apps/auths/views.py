@@ -112,7 +112,8 @@ class CustomTokenRefreshView(TokenRefreshView):
                 "message": "Token refreshed successfully",
                 "code": "200",
                 "data": {
-                    "access_token": response.data.get("access")
+                    "access_token": response.data.get("access"),
+                    "refresh_token": response.data.get("refresh")
                 }
             })
 
