@@ -86,7 +86,14 @@ class LogoutSerializer(serializers.Serializer):
     refresh = serializers.CharField()
 
     def validate(self, attrs):
-        self.token = attrs['refresh']
+        request = self.context.get("request")
+        token = RefreshToken(attrs["refresh"])
+        token_user_id = token.payload.get("user_id")
+        if request is None or str(request.user.id) != str(token_user_id):
+            raise serializers.ValidationError(
+                "Refresh token does not belong to the authenticated user"
+            )
+        self.token = attrs["refresh"]
         return attrs
 
     def save(self, **kwargs):

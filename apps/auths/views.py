@@ -127,7 +127,7 @@ class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        serializer = LogoutSerializer(data=request.data)
+        serializer = LogoutSerializer(data=request.data, context={"request": request})
 
         if serializer.is_valid():
             serializer.save()
