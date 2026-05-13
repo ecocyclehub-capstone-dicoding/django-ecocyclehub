@@ -1,14 +1,14 @@
 from rest_framework.views import APIView
-from rest_framework import status
+from rest_framework import status, serializers
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenRefreshView
 from apps.permissions.serializers import RoleSerializer
 from apps.users.serializers import UserResponseSerializer
 from apps.users.models import User
-from common.responses import format_error_response
-from .serializers import RegisterSerializer, LoginSerializer
+from common.responses import format_error_response, format_success_response
+from .serializers import LogoutSerializer, RegisterSerializer, LoginSerializer
 
 class RegisterView(APIView):
     permission_classes = [AllowAny]
@@ -112,7 +112,8 @@ class CustomTokenRefreshView(TokenRefreshView):
                 "message": "Token refreshed successfully",
                 "code": "200",
                 "data": {
-                    "access_token": response.data.get("access")
+                    "access_token": response.data.get("access"),
+                    "refresh_token": response.data.get("refresh")
                 }
             })
 
@@ -122,3 +123,40 @@ class CustomTokenRefreshView(TokenRefreshView):
             "code": str(response.status_code),
             "errors": response.data
         }, status=response.status_code)
+
+class LogoutView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = LogoutSerializer(data=request.data, context={"request": request})
+
+        if serializer.is_valid():
+            try:
+                serializer.save()
+            except serializers.ValidationError as exc:
+                return Response(
+                    format_error_response(
+                        "Validation error",
+                        exc.detail,
+                        400
+                    ),
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            return Response(
+                format_success_response(
+                    "Logout successful",
+                    None,
+                    200
+                ),
+                status=status.HTTP_200_OK
+            )
+
+        return Response(
+            format_error_response(
+                "Validation error",
+                serializer.errors,
+                400
+            ),
+            status=status.HTTP_400_BAD_REQUEST
+        )
