@@ -68,3 +68,19 @@ class CanDeleteLevel(HasPermission):
 class CanViewLeaderboard(HasPermission):
     def __init__(self):
         super().__init__("view_leaderboard")
+
+class CanAddUser(HasPermission):
+    def __init__(self):
+        super().__init__("add_user")
+
+class CanViewUser(HasPermission):
+    def __init__(self):
+        super().__init__("view_user")
+
+class CanEditUser(HasPermission):
+    def __init__(self):
+        super().__init__("edit_user")
+
+class CanDeleteUser(HasPermission):
+    def __init__(self):
+        super().__init__("delete_user")
