@@ -18,16 +18,5 @@ def create_user_balance_and_point(
         return
 
     with transaction.atomic():
-        Balance.objects.get_or_create(
-            user=instance,
-            defaults={
-                "total_balance": 0
-            }
-        )
-
-        Point.objects.get_or_create(
-            user=instance,
-            defaults={
-                "total_points": 0
-            }
-        )
+        Balance.objects.get_or_create(user=instance)
+        Point.objects.get_or_create(user=instance)
