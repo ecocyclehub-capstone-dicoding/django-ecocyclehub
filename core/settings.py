@@ -51,7 +51,7 @@ INSTALLED_APPS = [
     'drf_spectacular',
     'rest_framework_simplejwt.token_blacklist',
     # apps
-    'apps.users',
+    'apps.users.apps.UsersConfig',
     'apps.auths',
     'apps.categories',
     'apps.transactions',
