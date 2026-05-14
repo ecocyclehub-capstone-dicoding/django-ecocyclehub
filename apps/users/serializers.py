@@ -30,7 +30,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     password = serializers.CharField(
         write_only=True,
-        required=False,
+        required=True,
         error_messages={
             "required": "The password field is required.",
             "blank": "The password field cannot be empty."
@@ -79,7 +79,7 @@ class UserSerializer(serializers.ModelSerializer):
             ) from exc
 
         return value
-    
+
     def validate_role_key(self, value):
         allowed_roles = ["customer", "officer", "admin"]
 
