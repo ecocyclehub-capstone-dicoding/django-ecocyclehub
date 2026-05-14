@@ -6,6 +6,6 @@ from .views import (
 )
 
 urlpatterns = [
-    path("users/", UserListCreateView.as_view(), name="user-list-create"),
-    path("users/<uuid:pk>/", UserDetailView.as_view(), name="user-detail"),
+    path("", UserListCreateView.as_view(), name="user-list-create"),
+    path("<uuid:pk>/", UserDetailView.as_view(), name="user-detail"),
 ]
