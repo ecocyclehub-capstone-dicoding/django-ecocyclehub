@@ -37,15 +37,12 @@ class UserSerializer(serializers.ModelSerializer):
         }
     )
 
-    role_id = serializers.PrimaryKeyRelatedField(
-        queryset=Role.objects.filter(
-            key__in=["customer", "officer", "admin"]
-        ),
-        source="role",
+    role_key = serializers.CharField(
         write_only=True,
         required=True,
         error_messages={
-            "required": "The role_id field is required."
+            "required": "The role_key field is required.",
+            "blank": "The role_key field cannot be empty."
         }
     )
 
@@ -56,7 +53,7 @@ class UserSerializer(serializers.ModelSerializer):
             "name",
             "email",
             "password",
-            "role_id"
+            "role_key"
         ]
         read_only_fields = ["id"]
 
@@ -82,15 +79,38 @@ class UserSerializer(serializers.ModelSerializer):
             ) from exc
 
         return value
+    
+    def validate_role_key(self, value):
+        allowed_roles = ["customer", "officer", "admin"]
+
+        if value not in allowed_roles:
+            raise serializers.ValidationError(
+                "Invalid role key"
+            )
+
+        role = Role.objects.filter(key=value).first()
+
+        if not role:
+            raise serializers.ValidationError(
+                "Role not found"
+            )
+
+        return value
 
     def create(self, validated_data):
+        role_key = validated_data.pop("role_key")
+
+        role = Role.objects.filter(
+            key=role_key
+        ).first()
+
         try:
             with transaction.atomic():
                 return User.objects.create_user(
                     email=validated_data["email"],
                     password=validated_data["password"],
                     name=validated_data["name"],
-                    role=validated_data["role"],
+                    role=role,
                 )
 
         except IntegrityError as exc:
@@ -99,7 +119,22 @@ class UserSerializer(serializers.ModelSerializer):
             ) from exc
 
     def update(self, instance, validated_data):
-        password = validated_data.pop("password", None)
+        role_key = validated_data.pop(
+            "role_key",
+            None
+        )
+
+        if role_key:
+            role = Role.objects.filter(
+                key=role_key
+            ).first()
+
+            instance.role = role
+
+        password = validated_data.pop(
+            "password",
+            None
+        )
 
         instance.name = validated_data.get(
             "name",
@@ -109,11 +144,6 @@ class UserSerializer(serializers.ModelSerializer):
         instance.email = validated_data.get(
             "email",
             instance.email
-        )
-
-        instance.role = validated_data.get(
-            "role",
-            instance.role
         )
 
         if password:
