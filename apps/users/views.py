@@ -27,18 +27,23 @@ class UserListCreateView(APIView):
         permission_map = {
             'GET': CanViewUser,
             'POST': CanAddUser,
-            'PUT': CanEditUser,
-            'DELETE': CanDeleteUser,
         }
 
-        permission_class = permission_map.get(self.request.method)
+        permission_class = permission_map.get(
+            self.request.method
+        )
 
         return [permission_class()] if permission_class else []
 
     def get(self, request):
-        users = User.objects.select_related("role").all()
+        users = User.objects.select_related(
+            "role"
+        ).all().order_by("-created_at")
 
-        serializer = UserResponseSerializer(users, many=True)
+        serializer = UserResponseSerializer(
+            users,
+            many=True
+        )
 
         return Response(
             format_success_response(
@@ -50,7 +55,9 @@ class UserListCreateView(APIView):
         )
 
     def post(self, request):
-        serializer = UserSerializer(data=request.data)
+        serializer = UserSerializer(
+            data=request.data
+        )
 
         if serializer.is_valid():
             user = serializer.save()
@@ -64,7 +71,9 @@ class UserListCreateView(APIView):
                 status=status.HTTP_201_CREATED
             )
 
-        error = handle_serializer_error(serializer.errors)
+        error = handle_serializer_error(
+            serializer.errors
+        )
 
         return Response(
             error["response"],
@@ -76,18 +85,22 @@ class UserDetailView(APIView):
     def get_permissions(self):
         permission_map = {
             'GET': CanViewUser,
-            'POST': CanAddUser,
             'PUT': CanEditUser,
             'DELETE': CanDeleteUser,
         }
 
-        permission_class = permission_map.get(self.request.method)
+        permission_class = permission_map.get(
+            self.request.method
+        )
 
         return [permission_class()] if permission_class else []
 
     def get_object(self, pk):
         try:
-            return User.objects.select_related("role").get(pk=pk)
+            return User.objects.select_related(
+                "role"
+            ).get(pk=pk)
+
         except User.DoesNotExist:
             return None
 
@@ -128,7 +141,10 @@ class UserDetailView(APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        serializer = UserSerializer(user, data=request.data)
+        serializer = UserSerializer(
+            user,
+            data=request.data
+        )
 
         if serializer.is_valid():
             updated_user = serializer.save()
@@ -136,13 +152,17 @@ class UserDetailView(APIView):
             return Response(
                 format_success_response(
                     "Data updated successfully",
-                    UserResponseSerializer(updated_user).data,
+                    UserResponseSerializer(
+                        updated_user
+                    ).data,
                     200
                 ),
                 status=status.HTTP_200_OK
             )
 
-        error = handle_serializer_error(serializer.errors)
+        error = handle_serializer_error(
+            serializer.errors
+        )
 
         return Response(
             error["response"],
