@@ -39,7 +39,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     role_key = serializers.CharField(
         write_only=True,
-        required=True,
+        required=False,
         error_messages={
             "required": "The role_key field is required.",
             "blank": "The role_key field cannot be empty."
@@ -56,6 +56,15 @@ class UserSerializer(serializers.ModelSerializer):
             "role_key"
         ]
         read_only_fields = ["id"]
+
+    def validate(self, attrs):
+        if self.instance is None:
+            if not attrs.get("role_key"):
+                raise serializers.ValidationError({
+                    "role_key": "The role_key field is required."
+                })
+
+        return attrs
 
     def validate_email(self, value):
         queryset = User.objects.filter(email=value)
