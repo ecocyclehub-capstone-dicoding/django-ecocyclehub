@@ -220,3 +220,8 @@ SIMPLE_JWT = {
     'BLACKLIST_AFTER_ROTATION': True,
     "SIGNING_KEY": os.getenv("JWT_SECRET_KEY"),
 }
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://ecocyclehub-capstone-dicoding-ecocyclehub-api.hf.space",
+    "https://huggingface.co",
+]
