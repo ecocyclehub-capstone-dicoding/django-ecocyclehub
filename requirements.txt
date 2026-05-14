@@ -16,7 +16,7 @@ jsonschema-specifications==2025.9.1
 mccabe==0.7.0
 packaging==26.2
 platformdirs==4.9.6
-psycopg==3.3.3
+psycopg[binary]==3.3.3
 PyJWT==2.12.1
 pylint==4.0.5
 pylint-django==2.7.0
