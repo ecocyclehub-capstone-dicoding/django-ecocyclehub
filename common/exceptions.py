@@ -15,7 +15,7 @@ def handle_serializer_error(errors):
         return {
             "response": {
                 "success": False,
-                "message": "Category already registered",
+                "message": "Data already registered",
                 "code": "409"
             },
             "status": 409
