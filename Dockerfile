@@ -4,7 +4,12 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
 # create app user
-RUN addgroup --system app && adduser --system --group app
+RUN addgroup --system app && \
+    adduser --system --ingroup app --home /home/app app && \
+    mkdir -p /home/app && \
+    chown -R app:app /home/app
+
+ENV HOME=/home/app
 
 WORKDIR /app
 
