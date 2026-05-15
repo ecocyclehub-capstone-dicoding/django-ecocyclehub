@@ -23,6 +23,7 @@ ENV/
 
 # SQLite DB (dev only)
 db.sqlite3
+*.sqlite3
 
 # Media & Static (optional)
 media/
