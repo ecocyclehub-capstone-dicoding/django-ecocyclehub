@@ -6,6 +6,7 @@ from rest_framework import status
 from apps.transactions.models import Transaction
 from common.responses import format_success_response, format_error_response
 from common.exceptions import handle_serializer_error
+from common.pagination import StandardResultsSetPagination
 from apps.permissions.custom_permissions import (
     CanViewTransaction,
     CanCreateTransaction,
@@ -109,6 +110,7 @@ class TransactionVerifyView(APIView):
 
 class TransactionManagementView(APIView):
     permission_classes = [CanViewAllTransaction]
+    pagination_class = StandardResultsSetPagination
 
     def get(self, request, pk=None):
         if pk:
@@ -157,7 +159,10 @@ class TransactionManagementView(APIView):
 
         status_filter = request.query_params.get("status")
 
-        valid_statuses = [choice[0] for choice in Transaction.STATUS_CHOICES]
+        valid_statuses = [
+            choice[0]
+            for choice in Transaction.STATUS_CHOICES
+        ]
 
         if status_filter:
             if status_filter not in valid_statuses:
@@ -176,13 +181,16 @@ class TransactionManagementView(APIView):
 
         transactions = transactions.order_by("-created_at")
 
-        serializer = AdminTransactionSerializer(transactions, many=True)
+        paginator = self.pagination_class()
 
-        return Response(
-            format_success_response(
-                "Transactions retrieved successfully",
-                serializer.data,
-                200
-            ),
-            status=status.HTTP_200_OK
+        paginated_transactions = paginator.paginate_queryset(
+            transactions,
+            request
         )
+
+        serializer = AdminTransactionSerializer(
+            paginated_transactions,
+            many=True
+        )
+
+        return paginator.get_paginated_response(serializer.data)
