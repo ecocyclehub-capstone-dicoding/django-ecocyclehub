@@ -89,6 +89,9 @@ class LoginView(APIView):
                 "message": "User login successfully",
                 "code": "200",
                 "data": {
+                    "id": user.id,
+                    "name": user.name,
+                    "email": user.email,
                     "access_token": str(refresh.access_token),
                     "refresh_token": str(refresh),
                     "role": RoleSerializer(user.role).data if user.role else None
