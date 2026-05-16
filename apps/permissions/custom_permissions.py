@@ -33,6 +33,10 @@ class CanViewTransaction(HasPermission):
     def __init__(self):
         super().__init__("view_transaction")
 
+class CanViewAllTransaction(HasPermission):
+    def __init__(self):
+        super().__init__("view_all_transaction")
+
 class CanVerifyTransaction(HasPermission):
     def __init__(self):
         super().__init__("verify_transaction")
