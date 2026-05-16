@@ -90,3 +90,62 @@ class TransactionSerializer(serializers.ModelSerializer):
             }
             for d in obj.details.all()
         ]
+
+class AdminTransactionSerializer(serializers.ModelSerializer):
+    details = serializers.SerializerMethodField()
+    user = serializers.SerializerMethodField()
+    handled_by = serializers.SerializerMethodField()
+    verified_by = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Transaction
+        fields = [
+            "id",
+            "user",
+            "handled_by",
+            "verified_by",
+            "total_price",
+            "total_points",
+            "total_weight",
+            "status",
+            "created_at",
+            "verified_at",
+            "details"
+        ]
+
+    def get_user(self, obj):
+        return {
+            "id": obj.user.id,
+            "name": obj.user.name,
+        }
+
+    def get_handled_by(self, obj):
+        if not obj.handled_by:
+            return None
+
+        return {
+            "id": obj.handled_by.id,
+            "name": obj.handled_by.name,
+        }
+
+    def get_verified_by(self, obj):
+        if not obj.verified_by:
+            return None
+
+        return {
+            "id": obj.verified_by.id,
+            "name": obj.verified_by.name,
+        }
+
+    def get_details(self, obj):
+        return [
+            {
+                "category": d.category.name,
+                "weight": d.weight,
+                "price_per_kg": d.price_per_kg,
+                "point_per_kg": d.point_per_kg,
+                "total_price": d.total_price,
+                "total_point": d.total_point
+            }
+            for d in obj.details.all()
+        ]
