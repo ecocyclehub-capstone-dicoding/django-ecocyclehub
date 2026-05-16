@@ -6,19 +6,16 @@ USERS = [
     {
         "name": "Customer",
         "email": "customer@mail.com",
-        "password": "customer@mail.com",
         "role_key": "customer",
     },
     {
         "name": "Officer",
         "email": "officer@mail.com",
-        "password": "officer@mail.com",
         "role_key": "officer",
     },
     {
         "name": "Admin",
         "email": "admin@mail.com",
-        "password": "admin@mail.com",
         "role_key": "admin",
     },
 ]
@@ -46,7 +43,7 @@ def seed_users(apps, schema_editor):
         User.objects.create(
             name=item["name"],
             email=item["email"],
-            password=make_password(item["password"]),
+            password=make_password(None),
             role=role,
         )
 
