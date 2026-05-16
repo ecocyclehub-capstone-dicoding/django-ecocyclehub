@@ -52,17 +52,9 @@ def seed_users(apps, schema_editor):
 
 
 def reverse_seed_users(apps, schema_editor):
-    User = apps.get_model("users", "User")
-
-    emails = [
-        item["email"]
-        for item in USERS
-    ]
-
-    User.objects.filter(
-        email__in=emails
-    ).delete()
-
+    # Forward migration is idempotent and may skip pre-existing users.
+    # Avoid deleting by email to prevent data loss on rollback.
+    return
 
 class Migration(migrations.Migration):
 
@@ -74,6 +66,6 @@ class Migration(migrations.Migration):
     operations = [
         migrations.RunPython(
             seed_users,
-            reverse_seed_users
+            migrations.RunPython.noop
         ),
     ]
