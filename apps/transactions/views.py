@@ -13,7 +13,7 @@ from apps.permissions.custom_permissions import (
     CanViewAllTransaction
 )
 from apps.transactions.services import update_user_balance_and_points
-from .serializers import TransactionCreateSerializer, TransactionSerializer
+from .serializers import TransactionCreateSerializer, TransactionSerializer, AdminTransactionSerializer
 
 class TransactionListCreateView(APIView):
     def get_permissions(self):
@@ -124,7 +124,7 @@ class TransactionManagementView(APIView):
                     .get(pk=pk)
                 )
 
-                serializer = TransactionSerializer(transaction)
+                serializer = AdminTransactionSerializer(transaction)
 
                 return Response(
                     format_success_response(
@@ -176,7 +176,7 @@ class TransactionManagementView(APIView):
 
         transactions = transactions.order_by("-created_at")
 
-        serializer = TransactionSerializer(transactions, many=True)
+        serializer = AdminTransactionSerializer(transactions, many=True)
 
         return Response(
             format_success_response(

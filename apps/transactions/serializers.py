@@ -67,6 +67,32 @@ class TransactionCreateSerializer(serializers.Serializer):
 
 class TransactionSerializer(serializers.ModelSerializer):
     details = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Transaction
+        fields = [
+            "id",
+            "total_price",
+            "total_points",
+            "total_weight",
+            "status",
+            "created_at",
+            "details"
+        ]
+
+    def get_details(self, obj):
+        return [
+            {
+                "category": d.category.name,
+                "weight": d.weight,
+                "total_price": d.total_price,
+                "total_point": d.total_point
+            }
+            for d in obj.details.all()
+        ]
+
+class AdminTransactionSerializer(serializers.ModelSerializer):
+    details = serializers.SerializerMethodField()
     user = serializers.SerializerMethodField()
     handled_by = serializers.SerializerMethodField()
     verified_by = serializers.SerializerMethodField()
@@ -91,7 +117,6 @@ class TransactionSerializer(serializers.ModelSerializer):
         return {
             "id": obj.user.id,
             "name": obj.user.name,
-            "email": obj.user.email,
         }
 
     def get_handled_by(self, obj):
@@ -101,7 +126,6 @@ class TransactionSerializer(serializers.ModelSerializer):
         return {
             "id": obj.handled_by.id,
             "name": obj.handled_by.name,
-            "email": obj.handled_by.email,
         }
 
     def get_verified_by(self, obj):
@@ -111,7 +135,6 @@ class TransactionSerializer(serializers.ModelSerializer):
         return {
             "id": obj.verified_by.id,
             "name": obj.verified_by.name,
-            "email": obj.verified_by.email,
         }
 
     def get_details(self, obj):
