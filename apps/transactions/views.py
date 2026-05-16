@@ -9,7 +9,8 @@ from common.exceptions import handle_serializer_error
 from apps.permissions.custom_permissions import (
     CanViewTransaction,
     CanCreateTransaction,
-    CanVerifyTransaction
+    CanVerifyTransaction,
+    CanViewAllTransaction
 )
 from apps.transactions.services import update_user_balance_and_points
 from .serializers import TransactionCreateSerializer, TransactionSerializer
@@ -101,6 +102,86 @@ class TransactionVerifyView(APIView):
                     "id": transaction.id,
                     "status": transaction.status
                 },
+                200
+            ),
+            status=status.HTTP_200_OK
+        )
+
+class TransactionManagementView(APIView):
+    permission_classes = [CanViewAllTransaction]
+
+    def get(self, request, pk=None):
+        if pk:
+            try:
+                transaction = (
+                    Transaction.objects
+                    .select_related(
+                        "user",
+                        "handled_by",
+                        "verified_by"
+                    )
+                    .prefetch_related("details__category")
+                    .get(pk=pk)
+                )
+
+                serializer = TransactionSerializer(transaction)
+
+                return Response(
+                    format_success_response(
+                        "Transaction retrieved successfully",
+                        serializer.data,
+                        200
+                    ),
+                    status=status.HTTP_200_OK
+                )
+
+            except Transaction.DoesNotExist:
+                return Response(
+                    format_error_response(
+                        "Resource not found",
+                        None,
+                        404
+                    ),
+                    status=status.HTTP_404_NOT_FOUND
+                )
+
+        transactions = (
+            Transaction.objects
+            .select_related(
+                "user",
+                "handled_by",
+                "verified_by"
+            )
+            .prefetch_related("details__category")
+        )
+
+        status_filter = request.query_params.get("status")
+
+        valid_statuses = [choice[0] for choice in Transaction.STATUS_CHOICES]
+
+        if status_filter:
+            if status_filter not in valid_statuses:
+                return Response(
+                    format_error_response(
+                        "Invalid status filter",
+                        {
+                            "available_status": valid_statuses
+                        },
+                        400
+                    ),
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            transactions = transactions.filter(status=status_filter)
+
+        transactions = transactions.order_by("-created_at")
+
+        serializer = TransactionSerializer(transactions, many=True)
+
+        return Response(
+            format_success_response(
+                "Transactions retrieved successfully",
+                serializer.data,
                 200
             ),
             status=status.HTTP_200_OK
