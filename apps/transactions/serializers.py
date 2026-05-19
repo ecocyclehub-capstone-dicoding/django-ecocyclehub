@@ -1,6 +1,7 @@
 from django.db import transaction as db_transaction
 from rest_framework import serializers
 from apps.categories.models import Category
+from apps.users.models import User
 from .models import Transaction, TransactionDetail
 
 class TransactionDetailInputSerializer(serializers.Serializer):
@@ -13,11 +14,47 @@ class TransactionDetailInputSerializer(serializers.Serializer):
         return value
 
 class TransactionCreateSerializer(serializers.Serializer):
+    user_id = serializers.UUIDField(required=False)
     items = TransactionDetailInputSerializer(many=True)
 
+    def validate_user_id(self, value):
+        try:
+            user = User.objects.get(pk=value)
+        except User.DoesNotExist:
+            raise serializers.ValidationError("Selected customer does not exist")
+
+        if not user.role or user.role.key != "customer":
+            raise serializers.ValidationError("Selected user must be a customer")
+
+        return value
+
+    def validate(self, attrs):
+        request_user = self.context["request"].user
+        user_id = attrs.get("user_id")
+
+        if request_user.role and request_user.role.key != "customer":
+            if not user_id:
+                raise serializers.ValidationError({
+                    "user_id": "Officer or admin must select a customer user_id"
+                })
+
+        if request_user.role and request_user.role.key == "customer" and user_id:
+            if str(user_id) != str(request_user.id):
+                raise serializers.ValidationError(
+                    {"user_id": "Customers can only create transactions for themselves"}
+                )
+
+        return attrs
+
     def create(self, validated_data):
-        user = self.context["request"].user
+        request_user = self.context["request"].user
+        user_id = validated_data.get("user_id")
         items = validated_data["items"]
+
+        if user_id:
+            user = User.objects.get(pk=user_id)
+        else:
+            user = request_user
 
         category_ids = [item["category_id"] for item in items]
         categories = Category.objects.in_bulk(category_ids)
@@ -28,7 +65,17 @@ class TransactionCreateSerializer(serializers.Serializer):
             )
 
         with db_transaction.atomic():
-            transaction = Transaction.objects.create(user=user, status="pending")
+            handled_by = (
+                request_user
+                if request_user.role and request_user.role.key != "customer"
+                else None
+            )
+
+            transaction = Transaction.objects.create(
+                user=user,
+                handled_by=handled_by,
+                status="pending"
+            )
             total_price = 0
             total_points = 0
             total_weight = 0
