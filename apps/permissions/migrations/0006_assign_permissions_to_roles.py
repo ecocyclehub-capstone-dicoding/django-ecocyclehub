@@ -16,6 +16,7 @@ def assign_permissions(apps, schema_editor):
         "view_leaderboard",
         "view_categories",
         "view_customer_dashboard",
+        "view_level",
     ]
 
     # OFFICER
@@ -26,6 +27,7 @@ def assign_permissions(apps, schema_editor):
         "verify_transaction",
         "view_officer_dashboard",
         "view_leaderboard",
+        "view_user",
     ]
 
     # ADMIN
